@@ -23,7 +23,7 @@ classdef Quadcopter
     end
     
     methods
-        function quad = Quadcopter(inputArg1,inputArg2)
+        function quad = Quadcopter(x0)
             %This initializes the quadcopter object at some initial state
             %Also does any other intial math stuff to set up the quadcopter
 
@@ -31,7 +31,9 @@ classdef Quadcopter
         end
         
         function  quad = simDynamics(quad,u)
-            %
+            % This function will simulate the dynamics of the quadcopter
+
+
         end
     end
 end
