@@ -1,6 +1,5 @@
 classdef Quadcopter
-    %QUAD Summary of this class goes here
-    %   Detailed explanation goes here
+    
     
     properties
         %All states and accelerations:
@@ -19,21 +18,29 @@ classdef Quadcopter
         Iyy = 1;    %Inertia about y axis
         Izz = 1.3;  %Inertia about z axis
 
+        %Visualization
+        quadstl;
 
+        %Change
     end
     
+%% The methods section is where we will define any functions related to the quadcopter
     methods
         function quad = Quadcopter(x0)
             %This initializes the quadcopter object at some initial state
             %Also does any other intial math stuff to set up the quadcopter
-
+            quad.quadstl = stlread("Benchy.stl");
 
         end
         
         function  quad = simDynamics(quad,u)
             % This function will simulate the dynamics of the quadcopter
 
+        end
 
+        function quad = showQuad(quad)
+            cla
+            trimesh(quad.quadstl)
         end
     end
 end
