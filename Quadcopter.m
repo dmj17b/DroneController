@@ -50,24 +50,37 @@ classdef Quadcopter
         function  dq = quadRotODE(t,q,u,quad)
             % This is the ODE function that represents the dynamics of the
             % system
+            %      1;  2; 3; 4;5;6;7; 8; 9; 10;
+            % q = [w1;w2;w3;w4;r;p;ya;dr;dp;dya];
 
             T1 = u(1);
             T2 = u(2);
             T3 = u(3);
             T4 = u(4);
 
-            F1 = quad.kf*T1^2;
-            F2 = quad.kf*T2^2;
-            F3 = quad.kf*T3^2;
-            F4 = quad.kf*T4^2;
+            % Prop/Motor Dynamics:
+            dq(1) = u(1)/quad.Im - quad.kb*q(1);
+            dq(2) = u(2)/quad.Im - quad.kb*q(2);
+            dq(3) = u(3)/quad.Im - quad.kb*q(3);
+            dq(4) = u(4)/quad.Im - quad.kb*q(4);
 
-            dq(1) = q(4);
-            dq(2) = q(5);
-            dq(3) = q(6);
 
-            dq(4) = (quad.L*quad.kf/quad.Ixx)*(F2-F4) - quad.cdr*q(4);
-            dq(5) = (quad.L*quad.kf/quad.Iyy)*(F3-F1) - quad.cdr*q(5);
-            dq(6) = (T1+T3-T4-T2 - quad.cdya*q(6))/quad.Izz;
+            % Calculate thrust forced based on motor speed
+            F1 = quad.kf*dq(1)^2;
+            F2 = quad.kf*dq(2)^2;
+            F3 = quad.kf*dq(3)^2;
+            F4 = quad.kf*dq(4)^2;
+
+            % r,p,ya velocities
+            dq(5) = q(8);
+            dq(6) = q(9);
+            dq(7) = q(10);
+
+            % r,p,ya accelerations
+            dq(8) = (quad.L*quad.kf/quad.Ixx)*(F2-F4) - quad.cdr*q(8);
+            dq(9) = (quad.L*quad.kf/quad.Iyy)*(F3-F1) - quad.cdr*q(9);
+            dq(10) = (T1+T3-T4-T2 - quad.cdya*q(10))/quad.Izz;
+
             dq = dq';
         end
 
@@ -89,7 +102,7 @@ classdef Quadcopter
             axlim = 1;
             cla
             L = quad.L;
-            h = makehgtform('xrotate',quad.qAnim(i,1),'yrotate',quad.qAnim(i,2),'zrotate',quad.qAnim(i,3));
+            h = makehgtform('xrotate',quad.qAnim(i,5),'yrotate',quad.qAnim(i,6),'zrotate',quad.qAnim(i,7));
             L1 = [-L L; 0 0; 0 0; 1 1];
             L2 = [0 0; -L L; 0 0; 1 1];
             L1t = h*L1;
