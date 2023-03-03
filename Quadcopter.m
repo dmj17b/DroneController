@@ -108,8 +108,8 @@ classdef Quadcopter
             L1t = h*L1;
             L2t = h*L2;
             hold on
-            plot3(L1t(1,:),L1t(2,:),L1t(3,:));
-            plot3(L2t(1,:),L2t(2,:),L2t(3,:));
+            plot3(L1t(1,:),L1t(2,:),L1t(3,:),'Linewidth',3);
+            plot3(L2t(1,:),L2t(2,:),L2t(3,:),'Linewidth',3);
             axis equal
             axis([-axlim, axlim, -axlim, axlim, -axlim, axlim]);
             view(45,45)

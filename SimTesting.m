@@ -7,12 +7,12 @@ close all
 q0 = [0;0;0;0;0;0;0;0;0;0];
 quad = Quadcopter(q0);
 u = [1 1 1 1];
-[tout,qout,quad] = simRotDynamics(quad,u,[0 10]);
 
+% Call function to simulate quad dynamics based on 4 motor torques
+[tout,qout,quad] = simRotDynamics(quad,u,[0 30]);
 figure;
 
 for i = 1:numel(quad.tAnim)
  showQuad(quad,i);
- i
 end
 qout
