@@ -29,7 +29,7 @@ classdef Quadcopter
         qSimRot,tSimRot;    % Sim states when we're only looking at rotations
         qAnimRot,tAnimRot;  % Anim states when we're only looking at rotations
 
-        qSim, tSim;         % Full 6dof state w/ prop speeds
+        qSim, tsim;         % Full 6dof state w/ prop speeds
 
     end
     
@@ -98,7 +98,6 @@ classdef Quadcopter
         function  dq = quadODE(t,q,u,quad)
             % This is the ODE function that represents the dynamics of the
             % system
-
             %      1    2   3   4  5  6  7   8  9  10 11  12   13  14  15  16
             % q = [w1; w2; w3; w4; r; p; ya; x; y; z; dr; dp; dya; dx; dy; dz];
 
@@ -132,8 +131,7 @@ classdef Quadcopter
             dq(12) = (quad.L*quad.kf/quad.Iyy)*(F3-F1) - quad.cdr*q(12)/quad.Iyy;
             dq(13) = (T1+T3-T4-T2 - quad.cdya*q(13))/quad.Izz;
 
-            % x,y,z accelerations (set to zero while we figure out
-            % rotations)
+            % x,y,z accelerations
             dq(14) = 0;
             dq(15) = 0;
             dq(16) = 0;
@@ -153,14 +151,14 @@ classdef Quadcopter
 
         % Function that plots the quadcopter given a certain position and
         % rotation
-        function quad = showQuad(quad,qi)
+        function quad = showQuad(quad,i)
             % This shows a certain frame of the quadcopter animation
             % state (frame i of tAnim, qAnim)
             figure(1);
             axlim = 1;
             cla
             L = quad.L;
-            h = makehgtform('xrotate',qi(5),'yrotate',qi(6),'zrotate',qi(7));
+            h = makehgtform('xrotate',quad.qAnim(i,5),'yrotate',quad.qAnim(i,6),'zrotate',quad.qAnim(i,7));
             L1 = [-L L; 0 0; 0 0; 1 1];
             L2 = [0 0; -L L; 0 0; 1 1];
             L1t = h*L1;
