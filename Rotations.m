@@ -3,7 +3,7 @@ clear
 close all
 
 %% Figuring out roll, pitch, yaw rotation matrices
-syms r p y
+syms r p ya
 
 % Rotation about the x axis (roll)
 Rr = [1    0      0;
@@ -16,8 +16,8 @@ Rp = [cos(p) 0 sin(p);
       -sin(p) 0 cos(p)];
 
 % Rotation about the z axis (yaw)
-Ry = [cos(y) -sin(y) 0;
-      sin(y)  cos(y) 0;
+Rya = [cos(ya) -sin(ya) 0;
+      sin(ya)  cos(ya) 0;
         0      0     1];
 
-Rf = Ry*Rp*Rr
+Rf = Rya*Rp*Rr
