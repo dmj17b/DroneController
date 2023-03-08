@@ -4,17 +4,59 @@ close all
 
 %% 
 
-% q = [w1;w2;w3;w4;r;p;ya;x;y;zdr;dp;dya;dx;dy;dz];
-q0 = [0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0];
+% Initializing the Quadcopter:
+q0 = [0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0]; % q = [w1;w2;w3;w4;r;p;ya;x;y;zdr;dp;dya;dx;dy;dz];
 quad = Quadcopter(q0);
-u = [1 1.1 1 1.1];
+
+% Control Inputs:
+% u = [1.5 1 0.5 1];    % Example input for yaw
+% u = [1.5 1 1.5 1];    % Example input for pitch
+u = [1 1.5 1 0.5];    % Example input for roll
 
 % Call function to simulate quad dynamics based on 4 motor torques
 [tout,qout,quad] = simDynamics(quad,u,[0 5]);
 
+% Call function to plot roll, pitch, and yaw over time
+plotStates(quad);
 
 % Dummy simple animation loop
+figure
 for i = 1:numel(tout)
-    showQuad(quad,qout(i,:))
+    subplot(2,2,1)
+    showQuad(quad,qout(i,:));
+    view(45,45)
+    title('ISO View')
+    xlabel('X')
+    ylabel('Y')
+    zlabel('Z')
+
+
+    subplot(2,2,2)
+    showQuad(quad,qout(i,:));
+    title('X-Plane')
+    view(0,0)
+    xlabel('X')
+    ylabel('Y')
+    zlabel('Z')
+
+    subplot(2,2,3)
+    showQuad(quad,qout(i,:));
+    title('Y-Plane')
+    view(90,0)
+    xlabel('X')
+    ylabel('Y')
+    zlabel('Z')
+
+    subplot(2,2,4)
+    showQuad(quad,qout(i,:));
+    title('Z-Plane')
+    view(0,90)
+    xlabel('X')
+    ylabel('Y')
+    zlabel('Z')
+
+
+
+
 end
 

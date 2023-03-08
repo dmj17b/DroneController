@@ -20,7 +20,7 @@ classdef Quadcopter
         Izz = 8.801e-3;  %Inertia about z axis
         Im = 3.357e-5;   %Motor/prop inertia
 
-        kf = 2.98e-5;   %Lift coefficient for propeller rotation
+        kf = 2.98e-6;   %Lift coefficient for propeller rotation
         kb = 1.14e-7;      %Drag coefficient for propeller rotation
         cdr = 0.25;  %Drag coefficient for roll/pitch
         cdya = 0.25; %Drag coefficient for yaw
@@ -169,22 +169,25 @@ classdef Quadcopter
             plot3(L2t(1,:),L2t(2,:),L2t(3,:),'Linewidth',3);
             axis equal
             axis([-axlim, axlim, -axlim, axlim, -axlim, axlim]);
+            view(45,45)
             drawnow;
         end
 
         function quad = plotStates(quad)
             sgtitle('Angles over time')
             subplot(3,1,1)
-            plot(quad.tSim,quad.qSim(:,5))
             title('Roll Angle vs. Time')
+            plot(quad.tSim,quad.qSim(:,1))
 
             subplot(3,1,2)
-            plot(quad.tSim,quad.qSim(:,6))
             title('Pitch Angle vs. Time')
+            plot(quad.tSim,quad.qSim(:,1))
+
 
             subplot(3,1,3)
-            plot(quad.tSim,quad.qSim(:,7))
             title('Yaw Angle vs. Time')
+            plot(quad.tSim,quad.qSim(:,3))
+
         end
 
     end
