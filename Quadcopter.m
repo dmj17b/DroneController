@@ -158,10 +158,10 @@ classdef Quadcopter
             % state (frame i of tAnim, qAnim)
             axlim = 1;
             cla
-            L = quad.L;
+
             h = makehgtform('zrotate',qi(7),'yrotate',qi(6),'xrotate',qi(5));
-            L1 = [-L L; 0 0; 0 0; 1 1];
-            L2 = [0 0; -L L; 0 0; 1 1];
+            L1 = [-quad.L quad.L; 0 0; 0 0; 1 1];
+            L2 = [0 0; -quad.L quad.L; 0 0; 1 1];
             L1t = h*L1;
             L2t = h*L2;
             hold on
@@ -172,6 +172,9 @@ classdef Quadcopter
             drawnow;
         end
 
+       
+
+        % Plots roll, pitch, and yaw over time
         function quad = plotStates(quad)
             sgtitle('Angles over time')
             subplot(3,1,1)
@@ -185,6 +188,13 @@ classdef Quadcopter
             subplot(3,1,3)
             plot(quad.tSim,quad.qSim(:,7))
             title('Yaw Angle vs. Time')
+        end
+
+        % Function that plots the motor velocities in a bar chart
+        function quad = motorVelBarChart(quad,qi)
+            bar(qi(1:4));
+            ylim([0 1e6]);
+            drawnow;
         end
 
     end
