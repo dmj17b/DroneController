@@ -194,7 +194,46 @@ classdef Quadcopter
         function quad = motorVelBarChart(quad,qi)
             bar(qi(1:4));
             ylim([0 1e6]);
+            title('Motor Angular Velocities (Rad/s)')
+
             drawnow;
+        end
+
+        % Generates a pretty animation of quad rotations
+        function genRotAnim(quad,t,q,titre,filename)
+            %Titre = title of plot
+            %filename is option, but if included will export an MP4 of the
+            %animation
+
+            FPS = 30;
+            tAnim = 0:1/FPS:t(end);
+            qAnim = interp1(t,q,tAnim);
+
+            if(nargin>4)
+                v = VideoWriter(filename,'MPEG-4');
+                v.FrameRate = FPS;
+                open(v);
+            end
+
+            for i = 1:numel(tAnim)
+                % On first subplot, show quadcopter
+                ax1 = subplot(1,2,1);
+                sgtitle(titre);
+                showQuad(quad,qAnim(i,:));
+                view(ax1,[45 45]);
+                title('ISO View')
+                xlabel('X')
+                ylabel('Y')
+                zlabel('Z')
+
+
+                % On 2nd subplot, show motor velocities
+                ax2 = subplot(1,2,2);
+                motorVelBarChart(quad,qAnim(i,:));
+                if(nargin>4)
+                writeVideo(v,getframe(gcf));
+                end
+            end
         end
 
     end
