@@ -22,5 +22,7 @@ u = [1.5 1 0.5 1];    % Example input for pitch
 figure;
 plotStates(quad);
 
+% Call function to generate animation (add file name to 4th input if you
+% want to save the video as an MP4)
 figure;
-genRotAnim(quad,tout,qout,'Pitch Motion');
+genRotAnim(quad,tout,qout,'Pitch Motion',"Pitch.mp4");
