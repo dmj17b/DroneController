@@ -25,4 +25,4 @@ plotStates(quad);
 % Call function to generate animation (add file name to 4th input if you
 % want to save the video as an MP4)
 figure;
-genRotAnim(quad,tout,qout,'Roll Motion',"Roll.mp4");
+genRotAnim(quad,tout,qout,'R Motion',"Roll.mp4");
