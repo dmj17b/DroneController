@@ -110,17 +110,22 @@ classdef Quadcopter
             T4 = u(4);
 
             % Prop/Motor Dynamics:
-            dq(1) = u(1)/quad.Im - quad.kb*q(1)^2;
-            dq(2) = u(2)/quad.Im - quad.kb*q(2)^2;
-            dq(3) = u(3)/quad.Im - quad.kb*q(3)^2;
-            dq(4) = u(4)/quad.Im - quad.kb*q(4)^2;
+            dq(1) = u(1)/quad.Im - (quad.kb*q(1)^2)/quad.Im;
+            dq(2) = u(2)/quad.Im - (quad.kb*q(2)^2)/quad.Im;
+            dq(3) = u(3)/quad.Im - (quad.kb*q(3)^2)/quad.Im;
+            dq(4) = u(4)/quad.Im - (quad.kb*q(4)^2)/quad.Im;
 
 
             % Calculate thrust forced based on motor speed
-            F1 = quad.kf*dq(1)^2;
-            F2 = quad.kf*dq(2)^2;
-            F3 = quad.kf*dq(3)^2;
-            F4 = quad.kf*dq(4)^2;
+            F1 = quad.kf*q(1)^2;
+            F2 = quad.kf*q(2)^2;
+            F3 = quad.kf*q(3)^2;
+            F4 = quad.kf*q(4)^2;
+
+            Fv1 = F1*Rotate(q(5),q(6),q(7))*[0;0;1];
+            Fv2 = F2*Rotate(q(5),q(6),q(7))*[0;0;1];
+            Fv3 = F3*Rotate(q(5),q(6),q(7))*[0;0;1];
+            Fv4 = F4*Rotate(q(5),q(6),q(7))*[0;0;1];
 
             % r,p,ya velocities
             dq(5) = q(11);
@@ -235,6 +240,7 @@ classdef Quadcopter
                 end
             end
         end
+        
 
     end
 end

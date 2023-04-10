@@ -21,3 +21,5 @@ Rya = [cos(ya) -sin(ya) 0;
         0      0     1];
 
 Rf = Rya*Rp*Rr
+
+matlabFunction(Rf,'file','Rotate.m','vars',{r,p,ya})
