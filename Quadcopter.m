@@ -240,6 +240,28 @@ classdef Quadcopter
                 end
             end
         end
+
+        function linearizeDynamics(quad)
+            syms tau1 tau2 tau3 tau4 omega1 omega2 omega3 omega4 r p ya dr dp dya ddr ddp ddya
+            
+            % Thrust force from the four rotors
+            F1 = omega1.*quad.L;
+            F2 = omega2.*quad.L;
+            F3 = omega3.*quad.L;
+            F4 = omega4.*quad.L;
+
+            % All the xdot equations
+            eqn1 = (1/quad.Im).*(tau1 - quad.kb.*omega1.^2);
+            eqn2 = (1/quad.Im).*(tau2 - quad.kb.*omega2.^2);
+            eqn3 = (1/quad.Im).*(tau3 - quad.kb.*omega3.^2);
+            eqn4 = (1/quad.Im).*(tau4 - quad.kb.*omega4.^2);
+            eqn5 = dr;
+            eqn6 = dp;
+            eqn7 = dya;
+            eqn8 = (1/quad.Ixx).*(F2.*quad.L - F4.*quad.L - quad.cdr.*dr);
+            eqn9 = (1/quad.Iyy).*(F3.*quad.L - F1.*quad.L - quad.cdr.*dp);
+            eqn10 = (1/quad.Izz).*(tau1 + tau3 - tau2 - tau4 - quad.cdya.*dya)
+        end
         
 
     end
