@@ -241,8 +241,8 @@ classdef Quadcopter
             end
         end
 
-        function linearizeDynamics(quad)
-            syms tau1 tau2 tau3 tau4 omega1 omega2 omega3 omega4 r p ya dr dp dya ddr ddp ddya
+        function [A, B, statesFP, inputsFP] = linearizeDynamics(quad)
+            syms tau1 tau2 tau3 tau4 omega1 omega2 omega3 omega4 domega1 domega2 domega3 domega4 r p ya dr dp dya ddr ddp ddya
             
             % Thrust force from the four rotors
             F1 = omega1.*quad.L;
@@ -258,9 +258,58 @@ classdef Quadcopter
             eqn5 = dr;
             eqn6 = dp;
             eqn7 = dya;
-            eqn8 = (1/quad.Ixx).*(F2.*quad.L - F4.*quad.L - quad.cdr.*dr);
-            eqn9 = (1/quad.Iyy).*(F3.*quad.L - F1.*quad.L - quad.cdr.*dp);
-            eqn10 = (1/quad.Izz).*(tau1 + tau3 - tau2 - tau4 - quad.cdya.*dya)
+            eqn8_lhs = ddr;
+            eqn8_rhs = (1/quad.Ixx).*(F2.*quad.L - F4.*quad.L - quad.cdr.*dr);
+            eqn9_lhs = ddp;
+            eqn9_rhs = (1/quad.Iyy).*(F3.*quad.L - F1.*quad.L - quad.cdr.*dp);
+            eqn10_lhs = ddya;
+            eqn10_rhs = (1/quad.Izz).*(tau1 + tau3 - tau2 - tau4 - quad.cdya.*dya);
+
+            states = [omega1; omega2; omega3; omega4; r; p; ya; dr; dp; dya];
+            derivStates = [domega1; domega2; domega3; domega4; dr; dp; dya; ddr; ddp; ddya];
+            inputs = [tau1; tau2; tau3; tau4];
+            eqns_rhs = [eqn1; eqn2; eqn3; eqn4; eqn5; eqn6; eqn7; eqn8_rhs; eqn9_rhs; eqn10_rhs];
+
+            A = jacobian(eqns_rhs, states);
+            B = jacobian(eqns_rhs, inputs);
+
+            omega = sqrt(quad.m.*quad.g./(4.*quad.kb));
+            % I was trying to generalize but I think this would override
+            % the symbolic variable and screw stuff up
+%             omega2 = omega1;
+%             omega3 = omega1;
+%             omega4 = omega1;
+
+            eqn1 = subs(eqn1, [derivStates; omega1], [zeros(length(derivStates), 1); omega]) == 0;
+            eqn2 = subs(eqn2, [derivStates; omega2], [zeros(length(derivStates), 1); omega]) == 0;
+            eqn3 = subs(eqn3, [derivStates; omega3], [zeros(length(derivStates), 1); omega]) == 0;
+            eqn4 = subs(eqn4, [derivStates; omega4], [zeros(length(derivStates), 1); omega]) == 0;
+            eqn5 = dr == 0;
+            eqn6 = dp == 0;
+            eqn7 = dya == 0;
+            eqn8 = subs(eqn8_rhs, [omega2; omega4; dr], [omega; omega; 0]) == 0;
+            eqn9 = subs(eqn9_rhs, [omega1; omega3; dp], [omega; omega; 0]) == 0;
+            eqn10 = subs(eqn10_rhs, dya, 0) == 0;
+
+            eqns = [eqn1; eqn2; eqn3; eqn4];
+
+            soln = solve(eqns, inputs);
+
+            tau1 = double(soln.tau1);
+            tau2 = double(soln.tau2);
+            tau3 = double(soln.tau3);
+            tau4 = double(soln.tau4);
+
+            inputsFP = [tau1; tau2; tau3; tau4];
+            statesFP = [omega; omega; omega; omega; zeros(6,1)];
+
+            debug = false;
+            if (debug)
+                eqn10 = subs(eqn10_rhs, [inputs; dya], [inputsNum; 0]);
+            end
+
+            A = double(subs(A, states, statesFP));
+            B = double(subs(B, inputs, inputsFP));
         end
         
 

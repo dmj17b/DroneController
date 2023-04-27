@@ -23,27 +23,36 @@ plotStates(quad);
 
 
 
-%% Dummy simple animation loop
-FPS = 30;
-tAnim = 0:1/FPS:Tf;
-qAnim = interp1(tout,qout,tAnim);
+% %% Dummy simple animation loop
+% FPS = 30;
+% tAnim = 0:1/FPS:Tf;
+% qAnim = interp1(tout,qout,tAnim);
+% 
+% 
+% for i = 1:numel(tAnim)
+%     figure(2);
+%     view([45 45])
+% 
+%     showQuad(quad,qAnim(i,:));
+%     title('ISO View')
+%     xlabel('X')
+%     ylabel('Y')
+%     zlabel('Z')
+% 
+%     F1 = quad.kf*qAnim(i,1)^2;
+%     Fv1 = Rotate(qAnim(i,5),qAnim(i,6),qAnim(i,7))*[0;0;1];
+%     quiver3(0,0,0,Fv1(1),Fv1(2),Fv1(3));
+%     drawnow;
+% 
+%     
+% end
 
+%% Test Linearization
+[A, B, statesFP, inputsFP] = linearizeDynamics(quad);
 
-for i = 1:numel(tAnim)
-    figure(2);
-    view([45 45])
+testLin = Quadcopter([statesFP(1:7); zeros(3,1); statesFP(8:end); zeros(3,1)]);
+[tout,qout,testLin] = simDynamics(testLin,inputsFP,[0 Tf]);
 
-    showQuad(quad,qAnim(i,:));
-    title('ISO View')
-    xlabel('X')
-    ylabel('Y')
-    zlabel('Z')
-
-    F1 = quad.kf*qAnim(i,1)^2;
-    Fv1 = Rotate(qAnim(i,5),qAnim(i,6),qAnim(i,7))*[0;0;1];
-    quiver3(0,0,0,Fv1(1),Fv1(2),Fv1(3));
-    drawnow;
-
-    
-end
+figure();
+plotStates(testLin);
 
