@@ -60,10 +60,11 @@ classdef Quadcopter
             T4 = u(4);
 
             % Prop/Motor Dynamics:
-            dq(1) = u(1)/quad.Im - quad.kb*q(1);
-            dq(2) = u(2)/quad.Im - quad.kb*q(2);
-            dq(3) = u(3)/quad.Im - quad.kb*q(3);
-            dq(4) = u(4)/quad.Im - quad.kb*q(4);
+            dq(1) = (u(1) - quad.kb*q(1)^2)/quad.Im;
+            dq(2) = (u(2) - quad.kb*q(2)^2)/quad.Im;
+            dq(3) = (u(3) - quad.kb*q(3)^2)/quad.Im;
+            dq(4) = (u(4) - quad.kb*q(4)^2)/quad.Im;
+
 
 
             % Calculate thrust forced based on motor speed
@@ -110,10 +111,11 @@ classdef Quadcopter
             T4 = u(4);
 
             % Prop/Motor Dynamics:
-            dq(1) = u(1)/quad.Im - (quad.kb*q(1)^2)/quad.Im;
-            dq(2) = u(2)/quad.Im - (quad.kb*q(2)^2)/quad.Im;
-            dq(3) = u(3)/quad.Im - (quad.kb*q(3)^2)/quad.Im;
-            dq(4) = u(4)/quad.Im - (quad.kb*q(4)^2)/quad.Im;
+            dq(1) = (u(1) - quad.kb*q(1)^2)/quad.Im;
+            dq(2) = (u(2) - quad.kb*q(2)^2)/quad.Im;
+            dq(3) = (u(3) - quad.kb*q(3)^2)/quad.Im;
+            dq(4) = (u(4) - quad.kb*q(4)^2)/quad.Im;
+
 
 
             % Calculate thrust forced based on motor speed
