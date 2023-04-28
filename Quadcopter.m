@@ -67,10 +67,10 @@ classdef Quadcopter
 
 
             % Calculate thrust forced based on motor speed
-            F1 = quad.kf*dq(1)^2;
-            F2 = quad.kf*dq(2)^2;
-            F3 = quad.kf*dq(3)^2;
-            F4 = quad.kf*dq(4)^2;
+            F1 = quad.kf*q(1)^2;
+            F2 = quad.kf*q(2)^2;
+            F3 = quad.kf*q(3)^2;
+            F4 = quad.kf*q(4)^2;
 
             % r,p,ya velocities
             dq(5) = q(8);
@@ -132,6 +132,11 @@ classdef Quadcopter
             dq(6) = q(12);
             dq(7) = q(13);
 
+            % x,y,z velocities
+            dq(8) = q(14);
+            dq(9) = q(15);
+            dq(10) = q(16);
+
             % r,p,ya accelerations
             dq(11) = (quad.L*quad.kf/quad.Ixx)*(F2-F4) - quad.cdr*q(11)/quad.Ixx;
             dq(12) = (quad.L*quad.kf/quad.Iyy)*(F3-F1) - quad.cdr*q(12)/quad.Iyy;
@@ -139,9 +144,9 @@ classdef Quadcopter
 
             % x,y,z accelerations (set to zero while we figure out
             % rotations)
-            dq(14) = 0;
-            dq(15) = 0;
-            dq(16) = 0;
+            dq(14) = Fv1(1)+Fv2(1)+Fv3(1)+Fv4(1) - quad.cdr*q(14);
+            dq(15) = Fv1(2)+Fv2(2)+Fv3(2)+Fv4(2) - quad.cdr*q(15);
+            dq(16) = Fv1(3)+Fv2(3)+Fv3(3)+Fv4(3) - quad.cdr*q(16) - quad.m*quad.g;
 
             dq = dq';
         end
@@ -164,22 +169,24 @@ classdef Quadcopter
             axlim = 1;
             cla
 
-            h = makehgtform('zrotate',qi(7),'yrotate',qi(6),'xrotate',qi(5));
+            h = makehgtform('zrotate',qi(7),'yrotate',qi(6),'xrotate',qi(5),'translate',qi(8),qi(9),qi(10));
+%             h = TransRot(qi(5),qi(6),qi(7),qi(8),qi(9),qi(10));
             L1 = [-quad.L quad.L; 0 0; 0 0; 1 1];
             L2 = [0 0; -quad.L quad.L; 0 0; 1 1];
+
             L1t = h*L1;
             L2t = h*L2;
             hold on
             plot3(L1t(1,:),L1t(2,:),L1t(3,:),'Linewidth',3);
             plot3(L2t(1,:),L2t(2,:),L2t(3,:),'Linewidth',3);
             axis equal
-            axis([-axlim, axlim, -axlim, axlim, -axlim, axlim]);
+%             axis([-axlim, axlim, -axlim, axlim, -axlim, axlim]);
             drawnow;
         end
 
        
 
-        % Plots roll, pitch, and yaw over time
+        % Plots roll, pitch, yaw, x, y, z over time
         function quad = plotStates(quad)
             sgtitle('Angles over time')
             subplot(3,1,1)
@@ -193,6 +200,22 @@ classdef Quadcopter
             subplot(3,1,3)
             plot(quad.tSim,quad.qSim(:,7))
             title('Yaw Angle vs. Time')
+
+            figure;
+            sgtitle('Position over time')
+            subplot(3,1,1)
+            plot(quad.tSim,quad.qSim(:,8))
+            title('X Position vs. Time')
+
+            subplot(3,1,2)
+            plot(quad.tSim,quad.qSim(:,9))
+            title('Y Positon vs. Time')
+
+            subplot(3,1,3)
+            plot(quad.tSim,quad.qSim(:,10))
+            title('Z Position vs. Time')
+
+
         end
 
         % Function that plots the motor velocities in a bar chart

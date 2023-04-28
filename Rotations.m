@@ -3,7 +3,7 @@ clear
 close all
 
 %% Figuring out roll, pitch, yaw rotation matrices
-syms r p ya
+syms r p ya x y z
 
 % Rotation about the x axis (roll)
 Rr = [1    0      0;
@@ -20,6 +20,9 @@ Rya = [cos(ya) -sin(ya) 0;
       sin(ya)  cos(ya) 0;
         0      0     1];
 
-Rf = Rya*Rp*Rr
+Rf = Rya*Rp*Rr;
 
-matlabFunction(Rf,'file','Rotate.m','vars',{r,p,ya})
+T = [Rf,[x;y;z];[0 0 0 1]];
+
+% matlabFunction(Rf,'file','Rotate.m','vars',{r,p,ya})
+matlabFunction(T,'file','TransRot.m','vars',{r,p,ya,x,y,z})
