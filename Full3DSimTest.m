@@ -25,6 +25,8 @@ poles = linspace(-1, -100, 16);
 
 K1 = zeros([4 16]);
 K = place(A,B,poles);
+u = 0.044*[1 1 1 1];
+
 
 % Call function to simulate quad dynamics based on 4 motor torques
 % [tout,qout,quad] = simDynamics(quad,u,[0 Tf]);
@@ -36,25 +38,33 @@ quad.qSim = qout;
 plotStates(quad);
 
 
+<<<<<<< HEAD
 %% Animation loop
 FPS = 30;
 tAnim = 0:1/FPS:Tf;
 qAnim = interp1(tout,qout,tAnim);
 figure
 
-for i = 1:numel(tAnim)
-    view([45 45])
 
-    showQuad(quad,qAnim(i,:));
-    title('ISO View')
-    xlabel('X')
-    ylabel('Y')
-    zlabel('Z')
+%% Test Linearization
+[A, B, statesFP, inputsFP] = linearizeDynamics(quad);
 
-    F1 = quad.kf*qAnim(i,1)^2;
-    Fv1 = Rotate(qAnim(i,5),qAnim(i,6),qAnim(i,7))*[0;0;1];
 
-    drawnow
+testLin = Quadcopter([statesFP(1:7); zeros(3,1); statesFP(8:end); zeros(3,1)]);
+[tout,qout,testLin] = simDynamics(testLin,inputsFP,[0 Tf]);
 
-end
+figure();
+plotStates(testLin);
+
+Ctr = ctrb(A,B);
+poles = -1:-1:-10;
+
+K = place(A,B,poles);
+
+rank(Ctr);
+
+[tout,qout] = ode45(@(t,q) quadRotODE(t,q,K*q,quad),[0 5],quad.q0)
+
+
+
 
