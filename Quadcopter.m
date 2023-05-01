@@ -265,10 +265,10 @@ classdef Quadcopter
             end
         end
 
-        function [A,B] = linearize3D(quad,qStar,uStar)
-            q = sym("q",[16 1]);
+        function [A,B] = linearizeRot(quad,qStar,uStar)
+            q = sym("q",[10 1]);
             u = sym("u",[4 1]);
-
+            
             % Motor torques for the given inputs
             T1 = u(1);
             T2 = u(2);
@@ -289,33 +289,18 @@ classdef Quadcopter
             F3 = quad.kf*q(3)^2;
             F4 = quad.kf*q(4)^2;
 
-            Fv1 = F1*Rotate(q(5),q(6),q(7))*[0;0;1];
-            Fv2 = F2*Rotate(q(5),q(6),q(7))*[0;0;1];
-            Fv3 = F3*Rotate(q(5),q(6),q(7))*[0;0;1];
-            Fv4 = F4*Rotate(q(5),q(6),q(7))*[0;0;1];
 
-            % r,p,ya velocities
-            dq(5) = q(11);
-            dq(6) = q(12);
-            dq(7) = q(13);
+            % Angular Velocities:
+            dq(5) = q(8);
+            dq(6) = q(9);
+            dq(7) = q(10);
 
-            % x,y,z velocities
-            dq(8) = q(14);
-            dq(9) = q(15);
-            dq(10) = q(16);
-
-            % r,p,ya accelerations
+            % Angular accelerations
             dq(11) = (quad.L*quad.kf/quad.Ixx)*(F2-F4) - quad.cdr*q(11)/quad.Ixx;
             dq(12) = (quad.L*quad.kf/quad.Iyy)*(F3-F1) - quad.cdr*q(12)/quad.Iyy;
             dq(13) = (T1+T3-T4-T2 - quad.cdya*q(13))/quad.Izz;
 
-            % x,y,z accelerations (set to zero while we figure out
-            % rotations)
-            dq(14) = Fv1(1)+Fv2(1)+Fv3(1)+Fv4(1) - quad.cdr*q(14);
-            dq(15) = Fv1(2)+Fv2(2)+Fv3(2)+Fv4(2) - quad.cdr*q(15);
-            dq(16) = Fv1(3)+Fv2(3)+Fv3(3)+Fv4(3) - quad.cdr*q(16) - quad.m*quad.g;
-
-            dq = dq';
+            dq = dq'
 
 
             A = jacobian(dq,q);
@@ -323,7 +308,6 @@ classdef Quadcopter
 
             A = double(subs(A,q,qStar));
             B = double(subs(B,u,uStar));
-        end
         
 
     end
