@@ -296,9 +296,9 @@ classdef Quadcopter
             dq(7) = q(10);
 
             % Angular accelerations
-            dq(8) = (quad.L*quad.kf/quad.Ixx)*(F2-F4) - quad.cdr*q(5)/quad.Ixx;
-            dq(9) = (quad.L*quad.kf/quad.Iyy)*(F3-F1) - quad.cdr*q(6)/quad.Iyy;
-            dq(10) = (T1+T3-T4-T2 - quad.cdya*q(7))/quad.Izz;
+            dq(8) = (quad.L*quad.kf/quad.Ixx)*(F2-F4) - quad.cdr*q(8)/quad.Ixx;
+            dq(9) = (quad.L*quad.kf/quad.Iyy)*(F3-F1) - quad.cdr*q(9)/quad.Iyy;
+            dq(10) = (T1+T3-T4-T2 - quad.cdya*q(10))/quad.Izz;
 
             dq = dq';
 

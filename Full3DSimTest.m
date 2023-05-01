@@ -32,7 +32,7 @@ uStar = 0.0044*[1 1 1 1]';
 
 [A,B] = linearizeRot(quad,qStar,uStar)
 Ctr = ctrb(A,B);
-poles = -1:-1:-10;
+poles = linspace(-10,-20,10)
 
 K = place(A,B,poles);
 
