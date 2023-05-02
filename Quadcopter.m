@@ -228,6 +228,7 @@ classdef Quadcopter
             end
         end
 
+%%%%%%%%%%% Rotational Dynamics and Linearization %%%%%%%%%%%%%%%%%%%%%
 
         % ODE function for strictly simulating rotations
         function  dq = quadRotODE(t,q,u,quad)
@@ -261,6 +262,7 @@ classdef Quadcopter
             dq(4) = (quad.L*(F2-F4) - quad.cdr*q(4))/quad.Ixx;
             dq(5) = (quad.L*(F3-F1) - quad.cdr*q(5))/quad.Iyy;
             dq(6) = (T1+T3-T4-T2 - quad.cdya*q(6))/quad.Izz;
+
 
             dq = dq';
         end
