@@ -216,7 +216,9 @@ classdef Quadcopter
                 xlabel('X')
                 ylabel('Y')
                 zlabel('Z')
-
+            if (nargin>4)
+                writeVideo(v,getframe(gcf))
+            end
             end
         end
 
