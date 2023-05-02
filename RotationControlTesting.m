@@ -18,7 +18,7 @@ omegaReq = sqrt(Freq/quad.kf);
 
 qStar = [0;0;0;0;0;0];
 uStar = omegaReq*[1 1 1 1]';
-qDes = [pi/36; 0;0;0;0;0];
+qDes = [0.01; 0;0;0;0;0];
 
 % Linearize:
 [A,B] = linearizeRot(quad,qStar,uStar)
