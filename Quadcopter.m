@@ -47,44 +47,7 @@ classdef Quadcopter
 
         end
         
-        % ODE function for strictly simulating rotations
-        function  dq = quadRotODE(t,q,u,quad)
-            % This is the ODE function that represents the dynamics of the
-            % system
-            %      1;  2; 3; 4;5;6;7; 8; 9; 10;
-            % q = [w1;w2;w3;w4;r;p;ya;dr;dp;dya];
 
-            T1 = u(1);
-            T2 = u(2);
-            T3 = u(3);
-            T4 = u(4);
-
-            % Prop/Motor Dynamics:
-            dq(1) = (u(1) - quad.kb*q(1)^2)/quad.Im;
-            dq(2) = (u(2) - quad.kb*q(2)^2)/quad.Im;
-            dq(3) = (u(3) - quad.kb*q(3)^2)/quad.Im;
-            dq(4) = (u(4) - quad.kb*q(4)^2)/quad.Im;
-
-
-
-            % Calculate thrust forced based on motor speed
-            F1 = quad.kf*q(1)^2;
-            F2 = quad.kf*q(2)^2;
-            F3 = quad.kf*q(3)^2;
-            F4 = quad.kf*q(4)^2;
-
-            % r,p,ya velocities
-            dq(5) = q(8);
-            dq(6) = q(9);
-            dq(7) = q(10);
-
-            % r,p,ya accelerations
-            dq(8) = (quad.L*quad.kf/quad.Ixx)*(F2-F4) - quad.cdr*q(8);
-            dq(9) = (quad.L*quad.kf/quad.Iyy)*(F3-F1) - quad.cdr*q(9);
-            dq(10) = (T1+T3-T4-T2 - quad.cdya*q(10))/quad.Izz;
-
-            dq = dq';
-        end
 
         % Simulates rotational dynamics without considering x,y,z
         function [tout,qout,quad] = simRotDynamics(quad,u,tspan)
@@ -265,49 +228,84 @@ classdef Quadcopter
             end
         end
 
-        function [A,B] = linearizeRot(quad,qStar,uStar)
-            q = sym("q",[10 1]);
-            u = sym("u",[4 1]);
-            
-            % Motor torques for the given inputs
-            T1 = u(1);
-            T2 = u(2);
-            T3 = u(3);
-            T4 = u(4);
 
-            % Prop/Motor Dynamics:
-            dq(1) = (u(1) - quad.kb*q(1)^2)/quad.Im;
-            dq(2) = (u(2) - quad.kb*q(2)^2)/quad.Im;
-            dq(3) = (u(3) - quad.kb*q(3)^2)/quad.Im;
-            dq(4) = (u(4) - quad.kb*q(4)^2)/quad.Im;
+        % ODE function for strictly simulating rotations
+        function  dq = quadRotODE(t,q,u,quad)
+            % This is the ODE function that represents the dynamics of the
+            % system
+            %      1;2; 3; 4; 5;  6;
+            % q = [r;p;ya;dr;dp;dya];
+            % u = [w1; w2; w3; w4];
+
+            % If given a desired rotor velocity, these are required
+            % torques:
+            T1 = quad.kb*u(1)^2;
+            T2 = quad.kb*u(2)^2;
+            T3 = quad.kb*u(3)^2;
+            T4 = quad.kb*u(4)^2;
 
 
 
             % Calculate thrust forced based on motor speed
-            F1 = quad.kf*q(1)^2;
-            F2 = quad.kf*q(2)^2;
-            F3 = quad.kf*q(3)^2;
-            F4 = quad.kf*q(4)^2;
+            F1 = quad.kf*u(1)^2;
+            F2 = quad.kf*u(2)^2;
+            F3 = quad.kf*u(3)^2;
+            F4 = quad.kf*u(4)^2;
 
+            % r,p,ya velocities
+            dq(1) = q(4);
+            dq(2) = q(5);
+            dq(3) = q(6);
 
-            % Angular Velocities:
-            dq(5) = q(8);
-            dq(6) = q(9);
-            dq(7) = q(10);
-
-            % Angular accelerations
-            dq(8) = (quad.L*quad.kf/quad.Ixx)*(F2-F4) - quad.cdr*q(8)/quad.Ixx;
-            dq(9) = (quad.L*quad.kf/quad.Iyy)*(F3-F1) - quad.cdr*q(9)/quad.Iyy;
-            dq(10) = (T1+T3-T4-T2 - quad.cdya*q(10))/quad.Izz;
+            % r,p,ya accelerations
+            dq(4) = (quad.L*(F2-F4) - quad.cdr*q(4))/quad.Ixx;
+            dq(5) = (quad.L*(F3-F1) - quad.cdr*q(5))/quad.Iyy;
+            dq(6) = (T1+T3-T4-T2 - quad.cdya*q(6))/quad.Izz;
 
             dq = dq';
+        end
+
+        % Function to linearize rotational dynamics:
+        function [A,B] = linearizeRot(quad,qStar,uStar)
+            q = sym("q",[6 1]);
+            u = sym("u",[4 1]);
+  
+            % If given a desired rotor velocity, these are required
+            % torques:
+            T1 = quad.kb*u(1)^2;
+            T2 = quad.kb*u(2)^2;
+            T3 = quad.kb*u(3)^2;
+            T4 = quad.kb*u(4)^2;
 
 
+
+            % Calculate thrust forced based on motor speed
+            F1 = quad.kf*u(1)^2;
+            F2 = quad.kf*u(2)^2;
+            F3 = quad.kf*u(3)^2;
+            F4 = quad.kf*u(4)^2;
+
+            % r,p,ya velocities
+            dq(1) = q(4);
+            dq(2) = q(5);
+            dq(3) = q(6);
+
+            % r,p,ya accelerations
+            dq(4) = (quad.L*(F2-F4) - quad.cdr*q(4))/quad.Ixx;
+            dq(5) = (quad.L*(F3-F1) - quad.cdr*q(5))/quad.Iyy;
+            dq(6) = (T1+T3-T4-T2 - quad.cdya*q(6))/quad.Izz;
+
+            dq = dq';
             A = jacobian(dq,q);
             B = jacobian(dq,u);
 
-            A = double(subs(A,q,qStar));
-            B = double(subs(B,u,uStar));
+            A = subs(A,q,qStar);
+            A = subs(A,u,uStar);
+            B = subs(B,q,qStar);
+            B = subs(B,u,uStar);
+            A = double(A);
+            B = double(B);
+            
         end
 
         function [A, B, statesFP, inputsFP] = linearizeDynamics(quad)
