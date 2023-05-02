@@ -132,8 +132,8 @@ classdef Quadcopter
             % This shows a certain frame of the quadcopter animation
             % state (frame i of tAnim, qAnim)
             cla
-            axlim = 3;
-            h = makehgtform('zrotate',qi(7),'yrotate',qi(6),'xrotate',qi(5),'translate',qi(8),qi(9),qi(10));
+            axlim = 1;
+            h = makehgtform('zrotate',qi(3),'yrotate',qi(2),'xrotate',qi(1));
 %             h = TransRot(qi(5),qi(6),qi(7),qi(8),qi(9),qi(10));
             L1 = [-quad.L quad.L; 0 0; 0 0; 1 1];
             L2 = [0 0; -quad.L quad.L; 0 0; 1 1];
@@ -145,6 +145,8 @@ classdef Quadcopter
             plot3(L2t(1,:),L2t(2,:),L2t(3,:),'Linewidth',3);
             axis equal
             axis([-axlim, axlim, -axlim, axlim, -axlim, axlim]);
+            view(32,25)
+            grid on
             drawnow;
         end
 
@@ -209,25 +211,16 @@ classdef Quadcopter
 
             for i = 1:numel(tAnim)
                 % On first subplot, show quadcopter
-                ax1 = subplot(1,2,1);
-                sgtitle(titre);
+                title(titre);
                 showQuad(quad,qAnim(i,:));
-                view(ax1,[45 45]);
-                title('ISO View')
                 xlabel('X')
                 ylabel('Y')
                 zlabel('Z')
 
-
-                % On 2nd subplot, show motor velocities
-                ax2 = subplot(1,2,2);
-                motorVelBarChart(quad,qAnim(i,:));
-                if(nargin>4)
-                writeVideo(v,getframe(gcf));
-                end
             end
         end
 
+%%%%%%%%% THE NEWEST WORK %%%%%%%%%%%%
 
         % ODE function for strictly simulating rotations
         function  dq = quadRotODE(t,q,u,quad)
@@ -235,22 +228,8 @@ classdef Quadcopter
             % system
             %      1;2; 3; 4; 5;  6;
             % q = [r;p;ya;dr;dp;dya];
-            % u = [w1; w2; w3; w4];
+            % u = [Tr; Tp; Tya];
 
-            % If given a desired rotor velocity, these are required
-            % torques:
-            T1 = quad.kb*u(1)^2;
-            T2 = quad.kb*u(2)^2;
-            T3 = quad.kb*u(3)^2;
-            T4 = quad.kb*u(4)^2;
-
-
-
-            % Calculate thrust forced based on motor speed
-            F1 = quad.kf*u(1)^2;
-            F2 = quad.kf*u(2)^2;
-            F3 = quad.kf*u(3)^2;
-            F4 = quad.kf*u(4)^2;
 
             % r,p,ya velocities
             dq(1) = q(4);
@@ -258,9 +237,9 @@ classdef Quadcopter
             dq(3) = q(6);
 
             % r,p,ya accelerations
-            dq(4) = (quad.L*(F2-F4) - quad.cdr*q(4))/quad.Ixx;
-            dq(5) = (quad.L*(F3-F1) - quad.cdr*q(5))/quad.Iyy;
-            dq(6) = (T1+T3-T4-T2 - quad.cdya*q(6))/quad.Izz;
+            dq(4) = (u(1) - quad.cdr*q(4))/quad.Ixx;
+            dq(5) = (u(2) - quad.cdr*q(5))/quad.Iyy;
+            dq(6) = (u(3) - quad.cdya*q(6))/quad.Izz;
 
             dq = dq';
         end
@@ -268,22 +247,7 @@ classdef Quadcopter
         % Function to linearize rotational dynamics:
         function [A,B] = linearizeRot(quad,qStar,uStar)
             q = sym("q",[6 1]);
-            u = sym("u",[4 1]);
-  
-            % If given a desired rotor velocity, these are required
-            % torques:
-            T1 = quad.kb*u(1)^2;
-            T2 = quad.kb*u(2)^2;
-            T3 = quad.kb*u(3)^2;
-            T4 = quad.kb*u(4)^2;
-
-
-
-            % Calculate thrust forced based on motor speed
-            F1 = quad.kf*u(1)^2;
-            F2 = quad.kf*u(2)^2;
-            F3 = quad.kf*u(3)^2;
-            F4 = quad.kf*u(4)^2;
+            u = sym("u",[3 1]);
 
             % r,p,ya velocities
             dq(1) = q(4);
@@ -291,11 +255,12 @@ classdef Quadcopter
             dq(3) = q(6);
 
             % r,p,ya accelerations
-            dq(4) = (quad.L*(F2-F4) - quad.cdr*q(4))/quad.Ixx;
-            dq(5) = (quad.L*(F3-F1) - quad.cdr*q(5))/quad.Iyy;
-            dq(6) = (T1+T3-T4-T2 - quad.cdya*q(6))/quad.Izz;
+            dq(4) = (u(1) - quad.cdr*q(4))/quad.Ixx;
+            dq(5) = (u(2) - quad.cdr*q(5))/quad.Iyy;
+            dq(6) = (u(3) - quad.cdya*q(6))/quad.Izz;
 
             dq = dq';
+
             A = jacobian(dq,q);
             B = jacobian(dq,u);
 
@@ -308,76 +273,6 @@ classdef Quadcopter
             
         end
 
-        function [A, B, statesFP, inputsFP] = linearizeDynamics(quad)
-            syms tau1 tau2 tau3 tau4 omega1 omega2 omega3 omega4 domega1 domega2 domega3 domega4 r p ya dr dp dya ddr ddp ddya
-            
-            % Thrust force from the four rotors
-            F1 = omega1.*quad.L;
-            F2 = omega2.*quad.L;
-            F3 = omega3.*quad.L;
-            F4 = omega4.*quad.L;
-
-            % All the xdot equations
-            eqn1 = (1/quad.Im).*(tau1 - quad.kb.*omega1.^2);
-            eqn2 = (1/quad.Im).*(tau2 - quad.kb.*omega2.^2);
-            eqn3 = (1/quad.Im).*(tau3 - quad.kb.*omega3.^2);
-            eqn4 = (1/quad.Im).*(tau4 - quad.kb.*omega4.^2);
-            eqn5 = dr;
-            eqn6 = dp;
-            eqn7 = dya;
-            eqn8_lhs = ddr;
-            eqn8_rhs = (1/quad.Ixx).*(F2.*quad.L - F4.*quad.L - quad.cdr.*dr);
-            eqn9_lhs = ddp;
-            eqn9_rhs = (1/quad.Iyy).*(F3.*quad.L - F1.*quad.L - quad.cdr.*dp);
-            eqn10_lhs = ddya;
-            eqn10_rhs = (1/quad.Izz).*(tau1 + tau3 - tau2 - tau4 - quad.cdya.*dya);
-
-            states = [omega1; omega2; omega3; omega4; r; p; ya; dr; dp; dya];
-            derivStates = [domega1; domega2; domega3; domega4; dr; dp; dya; ddr; ddp; ddya];
-            inputs = [tau1; tau2; tau3; tau4];
-            eqns_rhs = [eqn1; eqn2; eqn3; eqn4; eqn5; eqn6; eqn7; eqn8_rhs; eqn9_rhs; eqn10_rhs];
-
-            A = jacobian(eqns_rhs, states);
-            B = jacobian(eqns_rhs, inputs);
-
-            omega = sqrt(quad.m.*quad.g./(4.*quad.kb));
-            % I was trying to generalize but I think this would override
-            % the symbolic variable and screw stuff up
-%             omega2 = omega1;
-%             omega3 = omega1;
-%             omega4 = omega1;
-
-            eqn1 = subs(eqn1, [derivStates; omega1], [zeros(length(derivStates), 1); omega]) == 0;
-            eqn2 = subs(eqn2, [derivStates; omega2], [zeros(length(derivStates), 1); omega]) == 0;
-            eqn3 = subs(eqn3, [derivStates; omega3], [zeros(length(derivStates), 1); omega]) == 0;
-            eqn4 = subs(eqn4, [derivStates; omega4], [zeros(length(derivStates), 1); omega]) == 0;
-            eqn5 = dr == 0;
-            eqn6 = dp == 0;
-            eqn7 = dya == 0;
-            eqn8 = subs(eqn8_rhs, [omega2; omega4; dr], [omega; omega; 0]) == 0;
-            eqn9 = subs(eqn9_rhs, [omega1; omega3; dp], [omega; omega; 0]) == 0;
-            eqn10 = subs(eqn10_rhs, dya, 0) == 0;
-
-            eqns = [eqn1; eqn2; eqn3; eqn4];
-
-            soln = solve(eqns, inputs);
-
-            tau1 = double(soln.tau1);
-            tau2 = double(soln.tau2);
-            tau3 = double(soln.tau3);
-            tau4 = double(soln.tau4);
-
-            inputsFP = [tau1; tau2; tau3; tau4];
-            statesFP = [omega; omega; omega; omega; zeros(6,1)];
-
-            debug = false;
-            if (debug)
-                eqn10 = subs(eqn10_rhs, [inputs; dya], [inputsNum; 0]);
-            end
-
-            A = double(subs(A, states, statesFP));
-            B = double(subs(B, inputs, inputsFP));
-        end
         
 
     end
