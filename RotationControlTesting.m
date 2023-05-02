@@ -8,7 +8,7 @@ close all
 q0 = [196.2544;196.2544;196.2544;196.2544;pi/6;0;0;0;0;0;0;0;0;0;0;0]; % q = [w1;w2;w3;w4;r;p;ya;x;y;z;dr;dp;dya;dx;dy;dz];
 quad = Quadcopter(q0);
 
-Tf = 1;
+Tf = 5;
 
 
 %% Linearization
@@ -16,7 +16,7 @@ Tf = 1;
 Freq = 0.25*(quad.m*quad.g);
 omegaReq = sqrt(Freq/quad.kf);
 
-qStar = [0;0;0;0;0;0;];
+qStar = [0;0;0;0;0;0];
 uStar = omegaReq*[1 1 1 1]';
 qDes = [pi/36; 0;0;0;0;0];
 
@@ -31,7 +31,8 @@ poles = linspace(-10,-60,6)
 K = place(A,B,poles)
 
 % Simulate:
-[tout,qout] = ode45(@(t,q) quadRotODE(t,q,K*q,quad),[0 5],[0;0;0;0;0;0]);
+[tout,qout] = ode45(@(t,q) quadRotODE(t,q,K*(qDes-q),quad),[0 Tf],[0;0;0;0;0;0]);
+
 
 subplot(3,1,1)
 plot(tout,qout(:,1))
