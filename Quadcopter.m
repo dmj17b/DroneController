@@ -128,24 +128,33 @@ classdef Quadcopter
 
         % Function that plots the quadcopter given a certain position and
         % rotation
-        function quad = showQuad(quad,qi)
+        function quad = showQuad(quad,qi,FPS)
             % This shows a certain frame of the quadcopter animation
             % state (frame i of tAnim, qAnim)
             cla
-            axlim = 3;
-            h = makehgtform('zrotate',qi(7),'yrotate',qi(6),'xrotate',qi(5),'translate',qi(8),qi(9),qi(10));
+            axlim = 0.5;
+%             h = makehgtform('zrotate',qi(7),'yrotate',qi(6),'xrotate',qi(5),'translate',qi(8),qi(9),qi(10));
+            h = makehgtform('zrotate',qi(3),'yrotate',qi(2),'xrotate',qi(1));
 %             h = TransRot(qi(5),qi(6),qi(7),qi(8),qi(9),qi(10));
             L1 = [-quad.L quad.L; 0 0; 0 0; 1 1];
             L2 = [0 0; -quad.L quad.L; 0 0; 1 1];
+            L3 = [0 0; 0 0; 0 quad.L; 1 1];
+%             L3 = [quad.L quad.L; 0 0; 0 quad.L; 1 1];
+%             L4 = [quad.L quad.L; 0 quad.L; 0 0; 1 1];
 
             L1t = h*L1;
             L2t = h*L2;
+            L3t = h*L3;
+%             L4t = h*L4;
             hold on
             plot3(L1t(1,:),L1t(2,:),L1t(3,:),'Linewidth',3);
             plot3(L2t(1,:),L2t(2,:),L2t(3,:),'Linewidth',3);
+            plot3(L3t(1,:),L3t(2,:),L3t(3,:),'Linewidth',3);
+%             plot3(L4t(1,:),L4t(2,:),L4t(3,:),'Linewidth',3);
             axis equal
             axis([-axlim, axlim, -axlim, axlim, -axlim, axlim]);
             drawnow;
+            pause(1/FPS);
         end
 
        
@@ -184,8 +193,8 @@ classdef Quadcopter
 
         % Function that plots the motor velocities in a bar chart
         function quad = motorVelBarChart(quad,qi)
-            bar(qi(1:4));
-            ylim([0 1e6]);
+            bar(qi(7:10));
+            ylim([0 205]);
             title('Motor Angular Velocities (Rad/s)')
 
             drawnow;
@@ -211,7 +220,7 @@ classdef Quadcopter
                 % On first subplot, show quadcopter
                 ax1 = subplot(1,2,1);
                 sgtitle(titre);
-                showQuad(quad,qAnim(i,:));
+                showQuad(quad,qAnim(i,:),FPS);
                 view(ax1,[45 45]);
                 title('ISO View')
                 xlabel('X')
